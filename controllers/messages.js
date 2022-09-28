@@ -1,29 +1,29 @@
 const { request, response } = require("express")
 
 const rootMessage = (req = request, res = response) => {
-    res.json({msg: 'mensajes'})
+    res.status(404).json({msg: 'mensajes'})
 }
 
 const himessage = (req = request, res = response) => {
-    res.json({msg: 'Hola mundo'})
+    res.status(400).json({msg: 'Hola mundo'})
 }
 
 const byeMessage = (req= request, res = response) => {
-    res.json({msg: 'Adios mundo'})
+    res.status(401).json({msg: 'Adios mundo'})
 }
 
 
 
 const postMessage = (req= request, res = response) => {
-    res.json({msg:'Mensaje post'})
+    res.status(405).json({msg:'Mensaje post'})
 }
 
 const putMessage = (req = request, res = response) => {
-    res.json({msg:'Mensaje put'})
+    res.status(409).json({msg:'Mensaje put'})
 }
 
 const deleteMessage = (req= request, res = response) => {
-    res.json({msg:'Mensaje delete'})
+    res.status(414).json({msg:'Mensaje delete'})
 }
 
 
