@@ -15,7 +15,7 @@ const router = Router()
 
 
 router.get('/', rootMessage) //End point   consultar
-router.get('/hi', himessage) //End point
+router.get('/hi/:name/:edad', himessage) //End point
 router.get('/bye', byeMessage) //End point
 
 router.post('/', postMessage) // crear o añadir
