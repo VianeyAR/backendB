@@ -1,5 +1,6 @@
 const express = require('express')
 const messagesRouter = require('./routes/messages')
+const UsuariosRouter = require('./routes/Usuarios')
 const cors = require('cors')
 
 class Server {
@@ -8,7 +9,8 @@ class Server {
         this.port = process.env.PORT
 
         this.paths = {
-            messages: "/api/v1/messages"
+            messages: "/api/v1/messages",
+            Usuarios: "/api/v1/Usuarios"
         }
         this.middlewares()
         this.routes()
@@ -19,6 +21,7 @@ class Server {
        // }) //End point
 
        this.app.use(this.paths.messages, messagesRouter)
+       this.app.use(this.paths.Usuarios, UsuariosRouter)
  }
     middlewares(){
         this.app.use(cors())// habilita origen curzado
