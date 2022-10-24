@@ -91,23 +91,16 @@ const addUser = async (req = request, res = response) => {
         return
     }
     let conn;
-    let element;
-
     try {
-
         conn = await pool.getConnection()//Realizamos la conexión
         //generamos la consulta
-        const consulta = await conn.query(`SELECT Nombre, Apellidos, Usuario FROM Usuarios WHERE Usuario = '${Usuario}'`, (error) =>{if(error) throw error})
-        console.log(Object.values(consulta))
-        for (const key in consulta) {
-            if (Object.hasOwnProperty.call(consulta, key)) {
-                element = consulta[key];
-                if (element.Usuario === Usuario){
-                    res.json({msg:`Datos Duplicados Para Usuario: '${Usuario}'`})
-                    break;
-                } else {
-                    conn = await pool.getConnection()//Realizamos la conexión
-                    //generamos la consulta
+        const [userExist] = await conn.query(`SELECT Usuario FROM Usuarios WHERE Usuario = '${Usuario}'`)
+        
+        if(userExist){
+            res.status(400).json({msg: `El usuario '${Usuario}' ya se encuentra registrado`})
+            return
+        }
+                 //generamos la consulta
                     const result = await conn.query(`INSERT INTO Usuarios(Nombre, Apellidos, Edad, Genero, Usuario, Contrasena, Fecha_Nacimiento, Activo) VALUES ('${Nombre}', '${Apellidos}', ${Edad}, '${Genero}', '${Usuario}', '${Contrasena}', '${Fecha_Nacimiento}', '${Activo}')`, (error) => {if(error) throw error})
 
                     if (result.affectedRows === 0) {//En caso de no haber resgistros lo informamos
@@ -115,12 +108,7 @@ const addUser = async (req = request, res = response) => {
                     return
                     }
                     res.json({msg:`Se agregó satisfactoriamente el usuario con Nombre ${Nombre}`})//Se manda la lista de usuarios
-                }
-            }
-        }
-        
-    }
-    catch (error){
+    }catch (error){
         console.log(error)
         res.status(500).json({msg: error})//informamos el error
     }finally{
@@ -130,4 +118,53 @@ const addUser = async (req = request, res = response) => {
 }
 
 
-module.exports = {getUsers, getUserByID, deleteUserByID, addUser}
+
+
+const updateUser = async (req = request, res = response) => {
+    const {id} = req.params
+    const {Nombre, Apellidos, Edad, Genero, Usuario, Contrasena, Fecha_Nacimiento, Activo} = req.body//URI params
+
+    if(!Nombre || !Apellidos || !Edad || !Usuario || !Contrasena || !Activo){
+        res.status(400).json({msg: "Faltan Datos"})
+        return
+    }
+    let conn;
+    try {
+        conn = await pool.getConnection()//Realizamos la conexión
+        
+                 //generamos la consulta
+                 const result = await conn.query(`UPDATE Usuarios SET 
+                 Nombre = '${Nombre}',
+                 Apellidos = '${Apellidos}',
+                 Edad = ${Edad},
+                 Genero = '${Genero}',
+                 Contrasena = '${Contrasena}',
+                 Fecha_Nacimiento = '${Fecha_Nacimiento}',
+                 Activo = '${Activo}' 
+                 WHERE id = ${id}`, (error) => {if (error) throw error})
+                 console.log(result.affectedRows)
+
+                    res.json({msg:`Se actualizo satisfactoriamente el usuario con Id '${id}'`})//Se manda la lista de usuarios
+    }catch (error){
+        console.log(error)
+        res.status(500).json({msg: error})//informamos el error
+    }finally{
+        if (conn) conn.end()//Termina la conexión
+    }
+
+}
+
+
+
+
+//End point para actualizar datos
+
+
+
+
+
+
+
+
+
+module.exports = {getUsers, getUserByID, deleteUserByID, addUser, updateUser}
