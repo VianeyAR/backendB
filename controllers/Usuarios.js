@@ -2,6 +2,9 @@ const{reques, response, request} = require("express")
 const bcryptjs = require("bcryptjs")
 const pool = require("../db/connection")
 
+const modelUsuarios = require("../models/usuarios")
+const {queryUserExists} = require("../models/usuarios")
+
 
 const getUsers = async (req = reques, res = response) => {
     let conn
@@ -9,7 +12,7 @@ const getUsers = async (req = reques, res = response) => {
         conn = await pool.getConnection() //realizamos la conexion
         
         //generamos la consulta
-        const users = await conn.query("SELECT * FROM Usuarios", (error) => {if (error) throw error})
+        const users = await conn.query(modelUsuarios.queryGetUsers, (error) => {if (error) throw error})
 
         if(!users){ // En caso de no haber registros lo informamos
             res.status(404).json({msg: "NO existen usuarios registrados"})
@@ -33,7 +36,7 @@ const getUserByID = async (req = request, res = response) =>{
         conn = await pool.getConnection() //realizamos la conexion
         
         //generamos la consulta
-        const [user] = await conn.query(`SELECT * FROM Usuarios WHERE ID = ${id}`, (error) => {if (error) throw error})
+        const [user] = await conn.query(modelUsuarios.queryGetUsersByID, [id], (error) => {if (error) throw error})
         console.log(user)
 
         if(!user){ // En caso de no haber registros lo informamos
@@ -62,7 +65,7 @@ const deleteUserByID = async (req = request, res = response) =>{
             conn = await pool.getConnection() //realizamos la conexion
             
             //generamos la consulta
-            const result = await conn.query(`UPDATE Usuarios SET Activo = 'N' WHERE ID = ${id}`, (error) => {if (error) throw error})
+            const result = await conn.query(modelUsuarios.queryDeleteUsersByID, [id], (error) => {if (error) throw error})
             console.log(result.affectedRows)
 
             if(result.affectedRows === 0){ // En caso de no haber registros lo informamos
@@ -98,24 +101,22 @@ const addUser = async (req = request, res = response) => {
     try {
         conn = await pool.getConnection()//Realizamos la conexión
         //generamos la consulta
-        const [userExist] = await conn.query(`SELECT Usuario FROM Usuarios WHERE Usuario = '${Usuario}'`)
+        const [userExist] = await conn.query(modelUsuarios.queryUserExists,[Usuario])
         
         if(userExist){
             res.status(400).json({msg: `El usuario '${Usuario}' ya se encuentra registrado`})
             return
         }
                  //generamos la consulta
-                    const result = await conn.query(`INSERT INTO Usuarios
-                    (Nombre,
+                    const result = await conn.query(modelUsuarios.queryAddUser,
+                        [Nombre,
                         Apellidos, 
                         Edad, 
                         Genero, 
                         Usuario, 
-                        Contrasena,
-                        Fecha_Nacimiento, Activo) VALUES ('${Nombre}', 
-                         '${Apellidos}', ${Edad}, '${Genero}', '${Usuario}',
-                          '${cc}', '${Fecha_Nacimiento}', '${Activo}')`, (error) => {if(error) throw error})
-
+                        cc,
+                        Fecha_Nacimiento, Activo], (error) => {if(error) throw error})
+                        console.log(result.affectedRows)
                     if (result.affectedRows === 0) {//En caso de no haber resgistros lo informamos
                     res.status(404).json({msg: `No se pudo agregar el usuarios con el Nombre ${Nombre}`})
                     return
@@ -191,7 +192,7 @@ const signIn = async (req = request, res = response) =>{
         conn = await pool.getConnection() //realizamos la conexion
         
         //generamos la consulta
-        const [user] = await conn.query(`SELECT Contrasena, Activo FROM Usuarios WHERE Usuario = '${Usuario}'`,
+        const [user] = await conn.query(modelUsuarios.querySignIn, [Usuario],
          (error) => {if (error) throw error})
         
          if(!user){

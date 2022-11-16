@@ -1,6 +1,7 @@
 const express = require('express')
 const messagesRouter = require('./routes/messages')
 const UsuariosRouter = require('./routes/Usuarios')
+const PlantsRouter = require('./routes/plants')
 const cors = require('cors')
 
 class Server {
@@ -10,7 +11,8 @@ class Server {
 
         this.paths = {
             messages: "/api/v1/messages",
-            Usuarios: "/api/v1/Usuarios"
+            Usuarios: "/api/v1/Usuarios",
+            plants: "/api/v1/plants"
         }
         this.middlewares()
         this.routes()
@@ -22,6 +24,7 @@ class Server {
 
        this.app.use(this.paths.messages, messagesRouter)
        this.app.use(this.paths.Usuarios, UsuariosRouter)
+       this.app.use(this.paths.plants, PlantsRouter)
  }
     middlewares(){
         this.app.use(cors())// habilita origen curzado
